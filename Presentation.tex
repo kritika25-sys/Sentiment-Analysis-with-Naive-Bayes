@@ -1,0 +1,299 @@
+\documentclass[usenames,dvipsnames]{beamer}
+\usetheme{Madrid}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{etoolbox}
+\AtBeginEnvironment{tabular}{\tiny}
+\begin{document}
+	\title{\textbf{MA-697 Seminar}}
+	\subtitle{\textbf{SENTIMENT ANALYSIS WITH NAIVE BAYES}}
+	\author{\textbf{KRITIKA GULATI (202123019)}}
+	\begin{frame}
+		\titlepage
+	\end{frame}
+\begin{frame}{Content}
+	\begin{itemize}
+		\item Introduction to Sentiment Analysis
+		\item Bayes Theorem
+		\item Assumptions
+		\item Derivation of Analysis
+		\item Training the Model
+		\item Optimising the Model
+		\item Implementation of the Model
+	\end{itemize}
+\end{frame}
+\begin{frame}{Sentiment Analysis}
+	\begin{block}{}
+		\textbf{Sentiment analysis} is the use of Natural Language Processing (NLP), machine learning, and other data analysis techniques to analyse and derive objective quantitative results from raw text.
+	\end{block}
+\begin{block}{}
+	It uses NLP to determine whether the sentiment/emotion of the text is positive, negative or neutral. It is often performed on textual data to help businesses monitor brand and product sentiment in customer feedback,  market research, etc.
+\end{block}
+\begin{center}
+	\includegraphics[width = 8 cm, height = 3 cm]{sentimentanal.png}
+\end{center}
+\end{frame}
+\begin{frame}{Sentiment Analysis}
+	\begin{block}{}
+	We are going to perform Sentiment Analysis using\textbf{ Supervised Machine Learning}. We will be provided with training inputs and each of these inputs will be associated with its correct output. Our model will make sense of this data, observe and analyze the relationship between the given inputs and outputs and finally predict with reasonable accuracy the output given a new unseen input.
+	\end{block}
+\end{frame}
+\begin{frame}{Bayes Theorem}
+	\begin{block}{Bayes Theorem}
+		Given two events A and B, 
+\begin{equation}
+	P (A \mid B) = P(B \mid A) \frac{P(A)}{P(B)}
+\end{equation}
+	\end{block}
+	Here, \\
+	\begin{itemize}
+	\item $P (A \mid B) = $ Probability of event A happening given that event B happens 
+	\item $P (B \mid A) = $ Probability of event B happening given that event A happens 
+	\item $P(A) = $ Probability of event A happening 
+	\item $P(B) = $ Probability of event B happening 
+	\end{itemize}
+\end{frame}
+\begin{frame}{Assumptions}
+	The various assumptions of this model are $\colon$ \\
+	\begin{itemize}
+		\item \textbf{bag-of-words} $\colon$ It implies that all the algorithm really cares about is the \underline{\textit{word and its frequency}}, that is, how many times the word has appeared in our data. The position of the word in our sentence(document) does not matter at all. We only have to keep track of the number of times a particular word appeared in our document.
+		\item Probability of each feature (words of a sentence in this case) is \textbf{independent} of other features given a class (positive/negative).
+		\item The events are independent of each other. That is, we do not have to take into account how two features are related to another or the probability of one feature occurring given another feature. This saves us a lot of computing power.
+	\end{itemize}
+\end{frame}
+\begin{frame}{Derivation of Analysis}
+	\begin{block}{Approach to the problem}
+	Our aim is to find the class (positive $/$ negative sentiment) given a particular sentence (document). Suppose we have a set of possible classes C (\textit{\{ positive, negative\}} in this case). We shall approach the problem as follows $\colon$
+	\begin{itemize}
+		\item We will find the probability of a document being in a particular class, that is, essentially, the conditional probability of a class given a document.
+		\item We shall iterate over all classes and find the class with maximum conditional probability that will provide us the answer. 
+	\end{itemize}
+\end{block}
+\end{frame}
+\begin{frame}{Derivation of Analysis}
+\begin{block}{}
+		\begin{equation}
+			\hat{c} = argmax_{c \in C} \{ P (c \mid d)\}
+		\end{equation}
+	where $\hat{c}$ denotes the class with maximum probability and\\
+	 $c = $ a particular class (positive/negative) \\
+	 $C = $ set of all classes (\{ positive,negative \} in this case) \\
+	 $d = $ a given sentence/document
+	 \end{block}
+ \begin{block}{}
+ 	Applying Bayes Theorem, 
+ 	\begin{equation}
+ 			\hat{c} = argmax_{c \in C} \{ P (c \mid d)\} =  argmax_{c \in C} \{ P (d \mid c) \frac{P(c)}{P(d)}\}
+ 	\end{equation}
+ We simplify this equation more. While iterating over the classes our document ofcourse does not change, only the class changes; so we can safely remove the $P(d)$ from our denominator without causing any major errors.
+ \end{block}
+\end{frame}
+\begin{frame}{Derivation of Analysis}
+	\begin{block}{}
+		Hence, the equation becomes 
+		\begin{equation}
+			\hat{c} = argmax_{c \in C} \{ P (c \mid d)\} =  argmax_{c \in C} \{ P (d \mid c)P(c) \}
+		\end{equation}
+	The term $P(d \mid c)$ is called \textbf{likelihood probability}. The second term $P(c)$ is called \textbf{prior probability}.
+	We can simplify it even further by dividing each document into a collection of features $f_{1}, f_{2}, f_{3}, \dots f_{n}$
+		\begin{equation}
+		\hat{c} = argmax_{c \in C} \{ P(f_{1}, f_{2}, \dots f_{n} \mid c)P(c) \}
+	\end{equation}
+	\end{block}
+\begin{block}{}
+	At this point of our derivation, we make use of assumption 2, that is, each feature $f_{i}$ is \textbf{independent} of other features given a class. This is a very crucial step and it reduces the time complexity of our problem by a huge margin. 
+\end{block}
+\end{frame}
+\begin{frame}{Derivation of Analysis}
+	\begin{block}{Independent Events}
+		If two events X and Y are \textbf{independent} of each other then the probability of the events occurring together $(P(X \ and \ Y))$ becomes $\colon$ 
+		$$P(X \cap Y) = P(X).P(Y)$$
+		which means
+		$$P(f_{1} \mid c \cap f_{2} \mid c) = P(f_{1} \mid c).P(f_{2} \mid c)$$
+	\end{block}
+\begin{block}{}
+	Thus, our final equation becomes $\colon$
+	$$P(f_{1}, f_{2}, \dots, f_{n} \mid c) = P(f_{1} \mid c).P(f_{2} \mid c)\dots P(f_{n} \mid c)$$
+	or 
+	\begin{equation}
+	\hat{c} = argmax_{c \in C} \{ P(f_{1} \mid c).P(f_{2} \mid c)\dots P(f_{n} \mid c).P(c) \}
+	\end{equation}
+\end{block}
+\end{frame}
+\begin{frame}{Derivation of Analysis}
+	\begin{block}{}
+	Replacing the features in our equation with $w_{i}$ for the word at the $i^{th}$ position we can re-frame our equation as follows $\colon$
+	\begin{equation}
+			\hat{c} = argmax_{c \in C} \{P(c).\prod _{i \in positions} P(w_{i} \mid c) \}
+	\end{equation}
+\end{block}
+\end{frame}
+\begin{frame}{Training The Model}
+	\begin{block}{Calculating the Prior Probability}
+		We will first find the number of documents belonging to each class. Finding the percentage of the documents in each class will give us the required prior probability.
+		Let’s assume the number of documents in class $c$ is $N_{c}$.
+		Total number of documents is assumed to be $N_{total}$. So, 
+		\begin{center}
+		$P(c) = \frac{N_{c}}{N_{total}}$
+		\end{center}
+	\end{block}
+\end{frame}
+\begin{frame}{Training The Model}
+\begin{block}{Calculating the Likelihood Probability}
+	Our main goal is to find the fraction of times the word $w_{i}$ appears among all words in all documents of class $c$. We first concatenate all documents with category $c$ to use the frequency of $w_{i}$ in this concatenated document to give the likelihood probability.
+	$$P(w_{i} \mid c) = \frac{count(w_{i},c)}{\sum_{w_{i} \in V}count(wi, c)} $$
+	Here $V$ is for the Vocabulary which is a collection of all words in all documents irrespective of class they belong to.
+\end{block}
+\end{frame}
+\begin{frame}{Training The Model}
+	\begin{block}{}
+		We however face a very unique problem at this point. Suppose the document we have as input is, \\
+		\textit{d = “I loved that movie.”} \\
+		The word \textit{“loved”} is only present in the positive class and no examples of \textit{“loved”} is present in the negative class input. Now from our equation, we have to find the probability by multiplying the likelihood probability for each class. If we calculate out likelihood probability for the word \textit{“loved”} for the class “negative” we get $\colon$
+		\begin{center}
+		\textit{P(“loved” $\mid$ “negative”) $= 0$}
+		\end{center}
+	Now if we plug in this value in our eqn., the entire probability of our class \textit{“negative”} becomes zero; no matter what the other values are.
+	\end{block}
+\end{frame}
+\begin{frame}{Training The Model}
+	\begin{block}{}
+		To combat this problem we will introduce a constant term, \textbf{Laplace Smoothing Coefficient} , to both the numerator and the denominator . Our equation will be modified as follows $\colon$
+		$$ P(w_{i} \mid c) = \frac{count(w_{i},c)+a}{\sum_{w_{i} \in V}(count(w_{i},c)+a)}$$
+		or
+		$$  P(w_{i} \mid c) = \frac{count(w_{i},c)+a}{\sum_{w_{i} \in V}count(w_{i},c) + \mid aV \mid}$$
+		Here $a$ is the \textbf{Laplace smoothing coefficient}. We usually consider its value to be $1$. \\
+		Now that we have calculated our prior and likelihood probability we can simply plug it in to obtain the result.
+	\end{block}
+\end{frame}
+\begin{frame}{Optimising The Model}
+	\begin{block}{Log Likelihood}
+		If we apply log on both sides of our equation we can convert the equation to a linear function of the features, which would increase efficiency quite a lot. The original equation we had was $\colon$
+		$$\hat{c} = argmax_{c \in C} \{P(c)\prod _{i \in positions} P(w_{i} \mid c) \}$$
+		Now if we apply Logarithm on both sides we get a linear function:
+		\begin{equation}
+		 \hat{c} =  argmax_{c \in C} \{ \log P(c) + \sum _{i \in positions} \log P(w_{i} \mid c) \}
+		\end{equation}
+	\end{block}
+\end{frame}
+\begin{frame}{Optimising The Model}
+	\begin{block}{Stop Words}
+		Words like \textit{the, a, an, was, when etc.} do not usually contribute to the sentiment of the statement. We can remove them entirely to streamline our model training.
+	\end{block}
+\begin{block}{Unknown Words}
+	Every time we come across a word which is present in the test dataset but absent in the vocabulary created from the training data, it is advisable to drop the words entirely and not consider them in the probability calculations.
+\end{block}
+\end{frame}
+\begin{frame}{Optimising The Model}
+	\begin{block}{Binary Mutinomial Naive - Baiyes}
+		This is a slightly modified version of the multinomial Naive-Bayes. Here we are going to \textbf{place more importance on whether a word is present or not than its frequency.} As we have already seen a single word can bring about a massive change in the sentiment of the sentence and thus it would be a logical way to disregard how many times that particular word appeared in a sentence and concentrate whether that particular word is present or not in the document.
+	\end{block}
+\begin{block}{}
+	Now, we shall use this model on a given sample dataset. Later on, we shall also see it's implementation in Python. The data for training set has been collected from \textit{NLTK's Twitter corpus 'twitter \_ samples'} in Python.
+\end{block}
+\end{frame}
+\begin{frame}{Implementation of the Model}
+	\begin{block}{Training Dataset}
+		\begin{table}[]
+			\begin{tabular}{|c|c|}
+				\hline
+				\textbf{DOCUMENT}               & \textbf{CLASS} \\ \hline
+				"Boring and Predictable"         & -     \\ \hline
+				"Excellent Movie"               & +     \\ \hline
+				"Extremely Mediocre"             & -     \\ \hline
+				"A pathetic attempt at a romcom" & -     \\ \hline
+				"Good movie with great actors"   & +     \\ \hline
+				"Fantastic Job!"                 & +     \\ \hline
+			\end{tabular}
+		\end{table}
+	\end{block}
+\begin{block}{Test Dataset}
+	\begin{itemize}
+		\item "Great Movie!"
+		\item "This is boring and pathetic."
+	\end{itemize}
+\end{block}
+\end{frame}
+\begin{frame}{Implementation of the Model}
+	\begin{block}{Vocabulary}
+	\begin{table}[]
+		\begin{tabular}{|c|c|c|}
+			\hline
+			\multicolumn{1}{|c|}{\textbf{Word}} & \textbf{class: positive} & \textbf{class: negative} \\ \hline
+		Boring        & 0               & 1               \\ \hline
+			And               & 0               & 1               \\ \hline
+			Predictable       & 1               & 0               \\ \hline
+			Excellent        & 1               & 0               \\ \hline
+			Movie           & 2               & 0               \\ \hline
+			Extremely       & 0               & 1               \\ \hline
+			Mediocre          & 0               & 1               \\ \hline
+			A                 & 0               & 2               \\ \hline
+			Pathetic           & 0               & 1               \\ \hline
+			Attempt            & 0               & 1               \\ \hline
+			At                  & 0               & 1               \\ \hline
+			Romcom             & 0               & 1               \\ \hline
+			Good              & 1               & 0               \\ \hline
+			With          & 1               & 0               \\ \hline
+			Great            & 1               & 0               \\ \hline
+			Actors           & 1               & 0               \\ \hline
+			Fantastic        & 1               & 0               \\ \hline
+			Job              & 1               & 0               \\ \hline
+			& \textbf{10}              & \textbf{10}              \\ \hline
+		\end{tabular}
+	\end{table}
+\end{block}
+\end{frame}
+\begin{frame}{Implementation of the Model: First Case}
+	\begin{block}{Prior Probability}
+		\begin{itemize}
+		\item 	P(c = 'positive') = $\frac{3}{6} = \frac{1}{2} = 0.5$ 
+		\item  	P(c = 'negative') = $\frac{3}{6} = \frac{1}{2} = 0.5$ 
+		\end{itemize}
+	\end{block}
+\begin{block}{Likelihood Probability}
+	\begin{itemize}
+		\item P ('Great' $\mid$ c = 'positive') = $\frac{1 + 1}{10 + 20} = 0.0666$
+		\item P ('movie' $\mid$ c = 'positive') = $\frac{2 + 1}{10 + 20} = 0.1$
+		\item P ('Great' $\mid$ c = 'negative') = $\frac{1 + 0}{10 + 20} = 0.0333$
+		\item P ('movie' $\mid$ c = 'negative') = $\frac{1 + 0}{10 + 20} = 0.0333$
+	\end{itemize}
+\end{block}
+\end{frame}
+\begin{frame}{Implementation of the Model: First Case}
+	\begin{block}{Log likelihood}
+The log likelihood is given as $\colon$ \\
+\begin{itemize}
+	\item $\log$ (P('Great' $\mid$ c = 'positive'))= $\log(0.0666) = -1.176$
+	\item $\log$ (P('movie' $\mid$ c = 'positive')) = $\log(0.1) = -1$
+	\item $\log$ (P('Great' $\mid$ c = 'negative')) = $\log(0.0333) = -1.4777$
+	\item $\log$ (P('movie' $\mid$ c = 'negative')) = $\log(0.0333) = -1.4777$
+	\item  $\log$ (P(c = 'positive')) = $\log(0.5) = -0.301$
+	\item  $\log$ (P(c = 'negative')) = $\log(0.5) = -0.301$
+\end{itemize}
+\end{block}
+\begin{block}{}
+	Hence, summing the respective probabilities,
+	$log (P(c = 'positive' \mid d)) = -2.4777$ and 
+	$log (P (c = 'negative' \mid d)) = -3.2564$ \\
+	$ \log \hat{c} =  argmax_{c \in C} \{ -2.4777, -3.2564\} \implies \hat{c} = \textbf{POSITIVE}$
+\end{block}
+\end{frame}
+\begin{frame}{Implementation of the Model: Second Case}
+	\begin{block}{}
+		For the second case, d = "This is boring and pathetic." \\
+		We shall be finding the sentiment of this sentence by implementing the model in \textit{Python}. 
+	\end{block}
+\end{frame}
+\begin{frame}{Bibliography}
+	\begin{itemize}
+		\item \textit{Natural Language Processing with Classification and Vector Spaces, Coursera}
+		\item \textit{A Hitchhiker’s Guide to Sentiment Analysis using Naive-Bayes Classifier, Towards Data Science} \\
+		\textit{https://towardsdatascience.com/a-hitchhikers-guide-to-sentiment-analysis-using-naive-bayes-classifier-b921c0fb694} 
+	\end{itemize}
+\end{frame}
+\begin{frame}
+	\begin{center}
+	\textbf{\Huge THE END}
+	\end{center}
+\end{frame}
+\end{document}
